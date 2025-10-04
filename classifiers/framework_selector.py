@@ -117,6 +117,249 @@ class FrameworkSelector:
         self, answers: Dict[str, Any], user_type: str
     ) -> Dict[str, Any]:
         """Check for conditions that might override base framework selection."""
+        # Analyze context for sophisticated framework matching
+        context_analysis = self._analyze_user_context(answers, user_type)
+
+        # Check for specific framework indicators
+        framework_scores = self._calculate_framework_scores(answers, user_type, context_analysis)
+
+        # Return best framework match
+        if framework_scores:
+            best_framework = max(framework_scores.items(), key=lambda x: x[1])
+            if best_framework[1] > 0.7:  # Confidence threshold
+                alternatives = [f for f, s in framework_scores.items() if s > 0.5 and f != best_framework[0]]
+                return {
+                    "framework": best_framework[0],
+                    "confidence": best_framework[1],
+                    "reasoning": self._generate_framework_reasoning(best_framework[0], context_analysis),
+                    "alternatives": alternatives[:3]  # Top 3 alternatives
+                }
+
+        # Fallback to legacy logic for specific cases
+        return self._legacy_framework_overrides(answers, user_type)
+
+    def _analyze_user_context(self, answers: Dict[str, Any], user_type: str) -> Dict[str, Any]:
+        """Analyze user context for framework selection."""
+        context = {
+            "revenue_level": answers.get("annual_revenue", "unknown"),
+            "growth_stage": answers.get("startup_stage", "unknown"),
+            "primary_goal": answers.get("primary_goal", ""),
+            "target_audience": answers.get("target_audience", ""),
+            "marketing_budget": answers.get("marketing_budget", ""),
+            "challenges": answers.get("challenges", []),
+            "dream_outcome": answers.get("dream_outcome", ""),
+            "user_type": user_type
+        }
+
+        # Extract key themes from text answers
+        context["themes"] = self._extract_key_themes(answers)
+        context["urgency_level"] = self._assess_urgency_level(answers)
+        context["complexity_level"] = self._assess_complexity_level(answers)
+
+        return context
+
+    def _calculate_framework_scores(self, answers: Dict[str, Any], user_type: str, context: Dict[str, Any]) -> Dict[str, float]:
+        """Calculate relevance scores for each framework."""
+        scores = {}
+
+        for framework, characteristics in self.FRAMEWORK_CHARACTERISTICS.items():
+            score = self._calculate_framework_relevance(framework, characteristics, context, user_type)
+            if score > 0.3:  # Only include relevant frameworks
+                scores[framework] = score
+
+        return scores
+
+    def _calculate_framework_relevance(self, framework: str, characteristics: Dict, context: Dict, user_type: str) -> float:
+        """Calculate how relevant a framework is for the user's context."""
+        score = 0.0
+        reasons = []
+
+        # Base score from user type alignment
+        if user_type in self.BASE_FRAMEWORKS and self.BASE_FRAMEWORKS[user_type] == framework:
+            score += 0.3
+            reasons.append("user_type_alignment")
+
+        # Score based on context match with framework characteristics
+        context_keywords = self._extract_context_keywords(context)
+
+        for keyword in context_keywords:
+            if keyword in characteristics.get("best_for", []):
+                score += 0.2
+                reasons.append(f"keyword_match_{keyword}")
+            if keyword in characteristics.get("focus", []):
+                score += 0.15
+                reasons.append(f"focus_match_{keyword}")
+
+        # Adjust for complexity match
+        complexity_match = self._check_complexity_match(characteristics["complexity"], context)
+        score += complexity_match * 0.1
+
+        # Boost for specific scenarios
+        scenario_boost = self._calculate_scenario_boost(framework, context)
+        score += scenario_boost
+
+        return min(score, 1.0)  # Cap at 1.0
+
+    def _extract_context_keywords(self, context: Dict[str, Any]) -> List[str]:
+        """Extract key themes and keywords from user context."""
+        keywords = []
+
+        # Extract from primary goal
+        goal = str(context.get("primary_goal", "")).lower()
+        if "brand" in goal:
+            keywords.extend(["personal_branding", "brand_building"])
+        if "audience" in goal or "community" in goal:
+            keywords.extend(["audience_building", "community_building"])
+        if "viral" in goal or "spread" in goal:
+            keywords.extend(["viral_potential", "word_of_mouth"])
+
+        # Extract from challenges
+        challenges = context.get("challenges", [])
+        if isinstance(challenges, list):
+            for challenge in challenges:
+                challenge_str = str(challenge).lower()
+                if "attention" in challenge_str or "engagement" in challenge_str:
+                    keywords.append("attention_economy")
+                if "positioning" in challenge_str or "competitive" in challenge_str:
+                    keywords.extend(["market_positioning", "competitive_strategy"])
+
+        # Extract from dream outcome
+        dream = str(context.get("dream_outcome", "")).lower()
+        if "media company" in dream or "content empire" in dream:
+            keywords.extend(["media_company", "content_creator"])
+        if "movement" in dream or "community" in dream:
+            keywords.append("movement_creation")
+
+        return list(set(keywords))  # Remove duplicates
+
+    def _check_complexity_match(self, framework_complexity: str, context: Dict[str, Any]) -> float:
+        """Check if framework complexity matches user needs."""
+        urgency = context.get("urgency_level", "medium")
+        user_complexity = context.get("complexity_level", "medium")
+
+        # High urgency usually needs simpler frameworks
+        if urgency == "high" and framework_complexity == "high":
+            return -0.1
+        if urgency == "low" and framework_complexity == "low":
+            return -0.05
+
+        # Match complexity preference
+        complexity_scores = {"low": 0.1, "medium": 0.2, "high": 0.3}
+        return complexity_scores.get(user_complexity, 0.1)
+
+    def _calculate_scenario_boost(self, framework: str, context: Dict[str, Any]) -> float:
+        """Calculate scenario-specific boosts for frameworks."""
+        boost = 0.0
+
+        # Permission marketing for trust-focused scenarios
+        if framework == "Seth_Godin_Permission":
+            trust_indicators = ["trust", "relationship", "loyalty", "permission"]
+            context_text = str(context).lower()
+            if any(indicator in context_text for indicator in trust_indicators):
+                boost += 0.2
+
+        # Purple Cow for differentiation needs
+        elif framework == "Seth_Godin_Purple_Cow":
+            diff_indicators = ["stand out", "unique", "remarkable", "different"]
+            context_text = str(context).lower()
+            if any(indicator in context_text for indicator in diff_indicators):
+                boost += 0.2
+
+        # Tribes for community building
+        elif framework == "Seth_Godin_Tribes":
+            community_indicators = ["community", "tribe", "movement", "leader"]
+            context_text = str(context).lower()
+            if any(indicator in context_text for indicator in community_indicators):
+                boost += 0.2
+
+        # Behavioral for psychological insights
+        elif framework == "Rory_Sutherland_Behavioral":
+            psych_indicators = ["behavior", "psychology", "human", "perception"]
+            context_text = str(context).lower()
+            if any(indicator in context_text for indicator in psych_indicators):
+                boost += 0.15
+
+        return boost
+
+    def _generate_framework_reasoning(self, framework: str, context: Dict[str, Any]) -> str:
+        """Generate human-readable reasoning for framework selection."""
+        characteristics = self.FRAMEWORK_CHARACTERISTICS[framework]
+
+        reasoning = f"Selected {framework} because "
+
+        # Add primary reason based on best match
+        if context.get("user_type") in self.BASE_FRAMEWORKS and self.BASE_FRAMEWORKS[context["user_type"]] == framework:
+            reasoning += f"it aligns with {context['user_type']} businesses"
+        else:
+            reasoning += f"of your specific goals and challenges"
+
+        reasoning += ". "
+
+        # Add framework benefits
+        reasoning += f"This framework focuses on {', '.join(characteristics['focus'][:2])} "
+        reasoning += f"and is ideal for {', '.join(characteristics['best_for'][:2])} scenarios."
+
+        return reasoning
+
+    def _extract_key_themes(self, answers: Dict[str, Any]) -> List[str]:
+        """Extract key themes from text answers."""
+        themes = []
+        text_answers = []
+
+        # Collect all text-based answers
+        for key, value in answers.items():
+            if isinstance(value, str) and len(value) > 10:
+                text_answers.append(value.lower())
+
+        # Look for common themes
+        theme_keywords = {
+            "authenticity": ["authentic", "real", "genuine", "honest"],
+            "community": ["community", "tribe", "group", "people"],
+            "innovation": ["innovative", "new", "different", "unique"],
+            "growth": ["grow", "scale", "expand", "increase"],
+            "attention": ["attention", "awareness", "visibility", "noticed"]
+        }
+
+        for theme, keywords in theme_keywords.items():
+            for answer in text_answers:
+                if any(keyword in answer for keyword in keywords):
+                    themes.append(theme)
+                    break
+
+        return themes
+
+    def _assess_urgency_level(self, answers: Dict[str, Any]) -> str:
+        """Assess urgency level from answers."""
+        urgency_indicators = {
+            "high": ["urgent", "asap", "quickly", "immediate", "deadline"],
+            "low": ["patient", "long-term", "gradual", "slow build"]
+        }
+
+        combined_text = str(answers).lower()
+
+        for level, indicators in urgency_indicators.items():
+            if any(indicator in combined_text for indicator in indicators):
+                return level
+
+        return "medium"
+
+    def _assess_complexity_level(self, answers: Dict[str, Any]) -> str:
+        """Assess complexity preference from answers."""
+        complexity_indicators = {
+            "high": ["comprehensive", "detailed", "thorough", "complete"],
+            "low": ["simple", "straightforward", "easy", "basic"]
+        }
+
+        combined_text = str(answers).lower()
+
+        for level, indicators in complexity_indicators.items():
+            if any(indicator in combined_text for indicator in indicators):
+                return level
+
+        return "medium"
+
+    def _legacy_framework_overrides(self, answers: Dict[str, Any], user_type: str) -> Dict[str, Any]:
+        """Legacy framework override logic for backward compatibility."""
         revenue = answers.get("annual_revenue")
         if revenue in {"$1M-$5M", "$5M+"}:
             return {
@@ -182,3 +425,58 @@ class FrameworkSelector:
         if isinstance(answer, str):
             return keyword.lower() in answer.lower()
         return False
+
+    def get_all_available_frameworks(self) -> Dict[str, Dict[str, Any]]:
+        """Get all available frameworks with their characteristics."""
+        return self.FRAMEWORK_CHARACTERISTICS.copy()
+
+    def get_framework_recommendations(self, answers: Dict[str, Any], user_type: str, top_n: int = 3) -> List[Dict[str, Any]]:
+        """Get top framework recommendations for the user."""
+        context_analysis = self._analyze_user_context(answers, user_type)
+        framework_scores = self._calculate_framework_scores(answers, user_type, context_analysis)
+
+        # Sort by score and return top recommendations
+        sorted_frameworks = sorted(framework_scores.items(), key=lambda x: x[1], reverse=True)
+
+        recommendations = []
+        for framework_name, score in sorted_frameworks[:top_n]:
+            characteristics = self.FRAMEWORK_CHARACTERISTICS[framework_name]
+            recommendations.append({
+                "framework": framework_name,
+                "score": score,
+                "confidence": min(score * 100, 99),
+                "description": characteristics["description"],
+                "best_for": characteristics["best_for"][:3],  # Top 3 use cases
+                "focus_areas": characteristics["focus"][:3],  # Top 3 focus areas
+                "complexity": characteristics["complexity"],
+                "reasoning": self._generate_framework_reasoning(framework_name, context_analysis)
+            })
+
+        return recommendations
+
+    def compare_frameworks(self, framework1: str, framework2: str, answers: Dict[str, Any], user_type: str) -> Dict[str, Any]:
+        """Compare two frameworks for the user's context."""
+        if framework1 not in self.FRAMEWORK_CHARACTERISTICS or framework2 not in self.FRAMEWORK_CHARACTERISTICS:
+            return {"error": "One or both frameworks not found"}
+
+        context_analysis = self._analyze_user_context(answers, user_type)
+        scores = self._calculate_framework_scores(answers, user_type, context_analysis)
+
+        score1 = scores.get(framework1, 0)
+        score2 = scores.get(framework2, 0)
+
+        return {
+            "framework1": {
+                "name": framework1,
+                "score": score1,
+                "characteristics": self.FRAMEWORK_CHARACTERISTICS[framework1]
+            },
+            "framework2": {
+                "name": framework2,
+                "score": score2,
+                "characteristics": self.FRAMEWORK_CHARACTERISTICS[framework2]
+            },
+            "winner": framework1 if score1 > score2 else framework2,
+            "margin": abs(score1 - score2),
+            "context_analysis": context_analysis
+        }
