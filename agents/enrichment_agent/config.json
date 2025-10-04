@@ -1,5 +1,0 @@
-{
-  "default_action": "geo",
-  "default_model": "default",
-  "rate_limit_ms": 100
-}

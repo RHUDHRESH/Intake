@@ -1,6 +1,0 @@
-{
-  "default_type": "schema",
-  "jsonschema_draft": "draft7",
-  "allow_empty_strings": false,
-  "stop_on_failure": false
-}
