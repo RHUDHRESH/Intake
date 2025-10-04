@@ -1,5 +1,5 @@
 """LangGraph orchestration for marketing intake workflows."""
-from typing import Dict, List, Optional, TypedDict
+from typing import Any, Dict, List, Optional, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledGraph

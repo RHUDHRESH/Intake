@@ -2,7 +2,7 @@
 Database Manager for Firestore
 """
 import os
-from typing import Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 import structlog
 from google.cloud import firestore
