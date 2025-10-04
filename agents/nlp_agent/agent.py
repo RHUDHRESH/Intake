@@ -1,16 +1,15 @@
-"""
-Natural Language Processing Agent
-"""
-from typing import Any, Dict
+"""Natural Language Processing Agent."""
+from typing import Any, Dict, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import sentiment_analysis, summarize_text, tag_text
 
 
 class NLPAgent(BaseAgent):
     """Processes text to generate summaries, tags, and sentiment."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         text = input_data.get("text", "")
         if not text:
             return {}
@@ -32,5 +31,5 @@ class NLPAgent(BaseAgent):
 
         return result
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

@@ -404,3 +404,27 @@ curl -X POST http://localhost:8080/intake \
 ```
 
 The system is now ready for both development and production use! 🚀
+## LangChain & LangGraph Scaffold
+
+- `langchain_tools/web_crawler_tool.py`: Playwright-powered `BaseTool` returning structured crawl output for chaining.
+- `graphs/marketing_graph.py`: Example `StateGraph` wiring the crawler into a reusable LangGraph workflow.
+- Install extras with `pip install -r requirements.txt` (now includes `langgraph`).
+- Run the graph: 
+  ```python
+  from graphs.marketing_graph import compile_marketing_graph
+
+  workflow = compile_marketing_graph()
+  result = workflow.invoke({"urls": ["https://example.com"]})
+  print(result)
+  ```
+- Extend by adding new tools/nodes and edges before calling `compile_marketing_graph`.
+
+
+## Shared Backbone
+
+- core.context manages agent request context using AgentContext and AgentContextManager.
+- core.telemetry standardises structured events via pluggable telemetry clients.
+- core.retry exposes RetryPolicy helpers for consistent retry/backoff semantics.
+- core.hitl defines the hitl queue contract with an in-memory implementation for tests.
+- utils.base_agent.AgentInput and BaseAgent unify config, telemetry, retries, and HITL for every agent.
+

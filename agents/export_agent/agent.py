@@ -1,16 +1,15 @@
-"""
-Export Agent for generating and distributing data extracts.
-"""
-from typing import Any, Dict, Iterable
+"""Export Agent for generating and distributing data extracts."""
+from typing import Any, Dict, Iterable, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import export_csv, export_drive, export_email, export_pdf
 
 
 class ExportAgent(BaseAgent):
     """Routes export requests to the appropriate export helper."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         export_format = input_data.get(
             "format", self.config.get("default_format", "csv")
         )
@@ -42,5 +41,5 @@ class ExportAgent(BaseAgent):
 
         return {"error": f"Unsupported format: {export_format}"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

@@ -1,7 +1,7 @@
 """Transformation agent handling mapping, filtering, aggregation, and format conversion."""
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import (
     aggregate_data,
     convert_format,
@@ -14,7 +14,8 @@ from .tools import (
 class TransformationAgent(BaseAgent):
     """Provide generalized data transformation operations."""
 
-    async def execute(self, input_data: Mapping[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         if not isinstance(input_data, Mapping):
             return {"error": "input_data must be a mapping"}
 
@@ -54,5 +55,5 @@ class TransformationAgent(BaseAgent):
 
         return {"error": f"Unknown transformation action '{action}'"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

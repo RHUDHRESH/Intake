@@ -1,16 +1,15 @@
-"""
-Document Management Agent
-"""
-from typing import Any, Dict
+"""Document Management Agent."""
+from typing import Any, Dict, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import create_doc, export_doc, update_doc
 
 
 class DocAgent(BaseAgent):
     """Creates, updates, and exports documents via Google Docs API."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         action = input_data.get("action", self.config.get("default_action", "create"))
         title = input_data.get("title", "New Document")
         content = input_data.get("content", "")
@@ -27,5 +26,5 @@ class DocAgent(BaseAgent):
 
         return {"error": "Invalid action or missing doc_id"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

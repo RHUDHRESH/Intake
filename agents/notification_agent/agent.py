@@ -1,16 +1,15 @@
-"""
-Notification Agent for multi-channel alerts.
-"""
-from typing import Any, Dict
+"""Notification Agent for multi-channel alerts."""
+from typing import Any, Dict, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import send_discord, send_email, send_slack, send_sms, send_telegram
 
 
 class NotificationAgent(BaseAgent):
     """Dispatches messages to supported notification channels."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         method = input_data.get("method", self.config.get("default_method", "telegram"))
         message = input_data.get("message", "")
         recipient = input_data.get("to")
@@ -38,5 +37,5 @@ class NotificationAgent(BaseAgent):
 
         return {"error": f"Unsupported notification method: {method}"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

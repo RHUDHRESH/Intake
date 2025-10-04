@@ -1,16 +1,15 @@
-"""
-Database persistence agent.
-"""
-from typing import Any, Dict
+"""Database persistence agent."""
+from typing import Any, Dict, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import delete_record, query_data, store_data, update_record
 
 
 class DatabaseAgent(BaseAgent):
     """Simple CRUD wrapper around Firestore."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         action = input_data.get("action", "store")
         collection = input_data.get("collection") or self.config.get(
             "default_collection", "intake_requests"
@@ -33,5 +32,5 @@ class DatabaseAgent(BaseAgent):
 
         return {"error": "Invalid action or missing parameters"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

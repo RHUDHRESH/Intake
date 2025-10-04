@@ -1,14 +1,15 @@
 """Configuration management agent."""
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import fetch_secret, get_config, set_config
 
 
 class ConfigAgent(BaseAgent):
     """Expose configuration retrieval, storage, and secret fetching."""
 
-    async def execute(self, input_data: Mapping[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         if not isinstance(input_data, Mapping):
             return {"error": "input_data must be a mapping"}
 
@@ -26,5 +27,5 @@ class ConfigAgent(BaseAgent):
 
         return {"error": "Invalid config action or missing parameters"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

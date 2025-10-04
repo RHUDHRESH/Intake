@@ -1,8 +1,8 @@
 """Orchestrator agent coordinating workflow execution."""
 import asyncio
-from typing import Any, Dict, Iterable, List, Mapping, Type
+from typing import Any, Dict, Iterable, List, Mapping, Tuple, Type
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 
 
 class OrchestratorAgent(BaseAgent):
@@ -11,12 +11,12 @@ class OrchestratorAgent(BaseAgent):
     def __init__(self, config: Mapping[str, Any], agent_registry: Mapping[str, Type[BaseAgent]]):
         if not isinstance(agent_registry, Mapping):
             raise TypeError("agent_registry must be a mapping of labels to agent classes")
-        super().__init__(dict(config))
+        super().__init__(config=dict(config))
         self.agent_registry: Dict[str, Type[BaseAgent]] = dict(agent_registry)
         self.available_agents: Dict[str, Type[BaseAgent]] = dict(agent_registry)
 
-    def get_dependencies(self) -> List[str]:
-        return [
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return (
             "web_crawler",
             "social_agent",
             "nlp_agent",
@@ -28,9 +28,10 @@ class OrchestratorAgent(BaseAgent):
             "notification_agent",
             "analytics_agent",
             "export_agent",
-        ]
+        )
 
-    async def execute(self, input_data: Mapping[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         if not isinstance(input_data, Mapping):
             raise TypeError("input_data must be a mapping with workflow instructions")
 
@@ -41,30 +42,38 @@ class OrchestratorAgent(BaseAgent):
             return {"workflow_results": []}
 
         if parallel:
-            results = await self._run_parallel(workflow)
+            results = await self._run_parallel(agent_input, workflow)
         else:
-            results = await self._run_sequential(workflow)
+            results = await self._run_sequential(agent_input, workflow)
 
         return {
             "workflow_results": results,
             "parallel": parallel,
         }
 
-    async def _run_sequential(self, steps: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+    async def _run_sequential(
+        self,
+        parent_input: AgentInput,
+        steps: Iterable[Mapping[str, Any]],
+    ) -> List[Dict[str, Any]]:
         results: List[Dict[str, Any]] = []
-        for step in steps:
+        for index, step in enumerate(steps):
             label, params = self._extract_step(step)
-            outcome = await self._invoke_agent(label, params)
+            outcome = await self._invoke_agent(parent_input, label, params, index)
             results.append(outcome)
             if outcome.get("error"):
                 break
         return results
 
-    async def _run_parallel(self, steps: Iterable[Mapping[str, Any]]) -> List[Dict[str, Any]]:
+    async def _run_parallel(
+        self,
+        parent_input: AgentInput,
+        steps: Iterable[Mapping[str, Any]],
+    ) -> List[Dict[str, Any]]:
         coroutines = []
-        for step in steps:
+        for index, step in enumerate(steps):
             label, params = self._extract_step(step)
-            coroutines.append(self._invoke_agent(label, params))
+            coroutines.append(self._invoke_agent(parent_input, label, params, index))
         return await asyncio.gather(*coroutines)
 
     def _extract_step(self, step: Mapping[str, Any]) -> tuple[str, Mapping[str, Any]]:
@@ -78,7 +87,13 @@ class OrchestratorAgent(BaseAgent):
             raise TypeError("Workflow step 'params' must be a mapping")
         return label, dict(params)
 
-    async def _invoke_agent(self, label: str, params: Mapping[str, Any]) -> Dict[str, Any]:
+    async def _invoke_agent(
+        self,
+        parent_input: AgentInput,
+        label: str,
+        params: Mapping[str, Any],
+        position: int,
+    ) -> Dict[str, Any]:
         agent_cls = self.agent_registry.get(label)
         if agent_cls is None:
             return {
@@ -87,10 +102,27 @@ class OrchestratorAgent(BaseAgent):
             }
 
         agent_config = self._resolve_agent_config(label)
-        agent_instance: BaseAgent = agent_cls(agent_config)
+        agent_instance: BaseAgent = agent_cls(
+            agent_config,
+            telemetry_client=self.telemetry,
+            retry_policy=self.retry_policy,
+            hitl_queue=self.hitl_queue,
+        )
+
+        child_context = parent_input.ensure_context().child(span_id=f"{label}-{position}")
+        child_metadata = dict(parent_input.metadata)
+        child_metadata.update({"parent_agent": self.agent_name, "child_agent": label})
+        child_input = AgentInput(
+            request_id=f"{parent_input.request_id}:{label}:{position}",
+            input_data=dict(params),
+            user_id=parent_input.user_id,
+            session_id=parent_input.session_id,
+            metadata=child_metadata,
+            context=child_context,
+        )
 
         try:
-            output = await agent_instance.execute(dict(params))
+            output = await agent_instance.execute(child_input)
             return {"agent": label, "output": output}
         except Exception as exc:  # pragma: no cover - defensive wrapper
             return {

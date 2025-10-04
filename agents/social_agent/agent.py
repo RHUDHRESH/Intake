@@ -1,16 +1,15 @@
-"""
-Social Media Intelligence Agent
-"""
-from typing import Any, Dict, List
+"""Social Media Intelligence Agent."""
+from typing import Any, Dict, List, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import fetch_google_trends, fetch_reddit_posts
 
 
 class SocialAgent(BaseAgent):
     """Fetches social media and trend data for supplied keywords."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         keywords: List[str] = input_data.get("keywords", [])
         if not keywords:
             return {"reddit_results": [], "trends_results": []}
@@ -32,5 +31,5 @@ class SocialAgent(BaseAgent):
 
         return {"reddit_results": reddit_results, "trends_results": trends_results}
 
-    def get_dependencies(self) -> List[str]:
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

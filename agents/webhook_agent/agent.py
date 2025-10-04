@@ -1,14 +1,15 @@
 """Webhook agent enabling secure send/receive operations."""
-from typing import Any, Dict, Mapping, Optional
+from typing import Any, Dict, Mapping, Optional, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import receive_webhook, send_webhook
 
 
 class WebhookAgent(BaseAgent):
     """Coordinate webhook deliveries and signature validation."""
 
-    async def execute(self, input_data: Mapping[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         if not isinstance(input_data, Mapping):
             return {"error": "input_data must be a mapping"}
 
@@ -55,5 +56,5 @@ class WebhookAgent(BaseAgent):
             timestamp_header=payload.get("timestamp_header", config.get("timestamp_header")),
         )
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

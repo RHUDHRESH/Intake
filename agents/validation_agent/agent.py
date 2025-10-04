@@ -1,14 +1,15 @@
 """Validation agent for enforcing data quality rules."""
-from typing import Any, Dict, Mapping, Sequence
+from typing import Any, Dict, Mapping, Sequence, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import run_validation_suite
 
 
 class ValidationAgent(BaseAgent):
     """Run schema, required, type, constraint, and custom validations."""
 
-    async def execute(self, input_data: Mapping[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         if not isinstance(input_data, Mapping):
             return {"error": "input_data must be a mapping"}
 
@@ -56,5 +57,5 @@ class ValidationAgent(BaseAgent):
             return result
         return suite_result
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

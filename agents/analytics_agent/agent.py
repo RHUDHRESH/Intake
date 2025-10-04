@@ -1,16 +1,15 @@
-"""
-Analytics Agent for data insights.
-"""
-from typing import Any, Dict
+"""Analytics Agent for data insights."""
+from typing import Any, Dict, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import generate_chart, run_bq_query, summarize_data
 
 
 class AnalyticsAgent(BaseAgent):
     """Runs analytical workloads such as BigQuery, summaries, and charting."""
 
-    async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         results: Dict[str, Any] = {}
 
         bq_query = input_data.get("bq_query")
@@ -28,5 +27,5 @@ class AnalyticsAgent(BaseAgent):
 
         return results
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()

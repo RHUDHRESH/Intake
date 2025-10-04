@@ -1,14 +1,15 @@
 """Monitoring agent for logging events, errors, and metrics."""
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, Tuple
 
-from utils.base_agent import BaseAgent
+from utils.base_agent import AgentInput, BaseAgent
 from .tools import fetch_logs, log_error, log_event, track_metric
 
 
 class MonitoringAgent(BaseAgent):
     """Provide a consistent interface for monitoring-related actions."""
 
-    async def execute(self, input_data: Mapping[str, Any]) -> Dict[str, Any]:
+    async def run(self, agent_input: AgentInput) -> Dict[str, Any]:
+        input_data = agent_input.input_data
         action = input_data.get("action")
         if not action:
             return {"error": "action is required"}
@@ -35,5 +36,5 @@ class MonitoringAgent(BaseAgent):
 
         return {"error": "Invalid monitoring action or missing parameters"}
 
-    def get_dependencies(self):
-        return []
+    def get_dependencies(self) -> Tuple[str, ...]:
+        return tuple()
