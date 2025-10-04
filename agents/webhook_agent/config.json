@@ -1,0 +1,9 @@
+{
+  "default_timeout": 10,
+  "max_retries": 3,
+  "backoff_factor": 0.5,
+  "verify_ssl": true,
+  "default_content_type": "json",
+  "signature_header": "X-Signature",
+  "signature_method": "sha256"
+}

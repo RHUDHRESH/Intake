@@ -1,0 +1,4 @@
+{
+  "dotenv_file": ".env",
+  "config_store_file": "config_store.json"
+}

@@ -1,0 +1,4 @@
+{
+  "log_file": "system_log.jsonl",
+  "metrics_file": "metrics_log.jsonl"
+}
