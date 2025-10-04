@@ -15,7 +15,7 @@ class MarketingState(TypedDict, total=False):
 def build_marketing_graph(
     *,
     crawler_tool: Optional[WebCrawlerTool] = None,
-) -> StateGraph[MarketingState]:
+) -> StateGraph:
     """Construct a LangGraph state machine for the marketing workflow.
 
     Parameters
@@ -25,7 +25,7 @@ def build_marketing_graph(
     """
 
     tool = crawler_tool or WebCrawlerTool()
-    graph: StateGraph[MarketingState] = StateGraph(MarketingState)
+    graph = StateGraph(MarketingState)
 
     async def crawl_node(state: MarketingState) -> MarketingState:
         urls = state.get("urls", []) or []
@@ -41,7 +41,8 @@ def build_marketing_graph(
     return graph
 
 
-def compile_marketing_graph(**kwargs) -> CompiledGraph[MarketingState]:
+def compile_marketing_graph(**kwargs) -> CompiledGraph:
     """Convenience helper returning the compiled LangGraph workflow."""
     graph = build_marketing_graph(**kwargs)
     return graph.compile()
+

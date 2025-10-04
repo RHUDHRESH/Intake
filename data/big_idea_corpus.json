@@ -1,0 +1,82 @@
+[
+  {
+    "headline": "Why One Tablet of Excedrin Is Better Than Two Headache Powders",
+    "campaign": "Excedrin One Tablet Challenge",
+    "angle": "Specific proof and quantified comparison",
+    "metrics": {
+      "ctr": 0.14,
+      "roi": 4.2
+    },
+    "source": "ogilvy_archive"
+  },
+  {
+    "headline": "How To Double Your Farm Yields Without Buying New Land",
+    "campaign": "AgriBoost Soil Treatments",
+    "angle": "Performance promise backed by data",
+    "metrics": {
+      "ctr": 0.19,
+      "roi": 5.1
+    },
+    "source": "agriculture_case"
+  },
+  {
+    "headline": "The Secret Volkswagen Owners Learned At 25 Miles Per Gallon",
+    "campaign": "VW Mileage Truth",
+    "angle": "Contrarian benefit reveal",
+    "metrics": {
+      "ctr": 0.17,
+      "roi": 4.9
+    },
+    "source": "ogilvy_archive"
+  },
+  {
+    "headline": "What Doctors Know About Pepsodent That You Don't",
+    "campaign": "Pepsodent Authority Proof",
+    "angle": "Authority-backed consumer education",
+    "metrics": {
+      "ctr": 0.21,
+      "roi": 6.4
+    },
+    "source": "ogilvy_archive"
+  },
+  {
+    "headline": "Only Hathaway Gives You The Eyepatch That Started A Movement",
+    "campaign": "Hathaway Shirt",
+    "angle": "Character-driven social proof",
+    "metrics": {
+      "ctr": 0.16,
+      "roi": 6.0
+    },
+    "source": "ogilvy_archive"
+  },
+  {
+    "headline": "They Laughed When We Put AI Behind Their Ads - Until Clicks Doubled",
+    "campaign": "Modern AI Testing",
+    "angle": "Historic structure meets modern data",
+    "metrics": {
+      "ctr": 0.24,
+      "roi": 5.7
+    },
+    "source": "modern_case"
+  },
+  {
+    "headline": "Mail This Card Today And Triple Your Appointment Bookings",
+    "campaign": "Service Business Direct Mail",
+    "angle": "Urgent call-to-action with quantified result",
+    "metrics": {
+      "ctr": 0.12,
+      "roi": 3.8
+    },
+    "source": "direct_response"
+  },
+  {
+    "headline": "From Empty Tables To Waitlists In 30 Days",
+    "campaign": "Local Restaurant Turnaround",
+    "angle": "Time-bound transformation story",
+    "metrics": {
+      "ctr": 0.22,
+      "roi": 5.5
+    },
+    "source": "hospitality_case"
+  }
+]

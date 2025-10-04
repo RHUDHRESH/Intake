@@ -1,0 +1,239 @@
+{
+  "framework": "ADAPT",
+  "execution_date": "2025-10-04T14:30:40.543750",
+  "user_type": "business_owner",
+  "stages": {
+    "audience": {
+      "stage": "Audience Alignment",
+      "primary_persona": {
+        "name": "Business Betty",
+        "description": "Small business owner in Chennai, India",
+        "key_challenges": [
+          "Limited marketing budget",
+          "Time constraints",
+          "Unclear ROI"
+        ],
+        "primary_goals": [
+          "Increase revenue",
+          "Build brand awareness",
+          "Streamline operations"
+        ],
+        "target_description": "Local restaurant owners aged 30-50 who are tech-savvy but lack marketing expertise"
+      },
+      "pain_points": [
+        "Customer acquisition",
+        "Competition",
+        "Cash flow management",
+        "Converting social media engagement into actual customer visits"
+      ],
+      "value_proposition": {
+        "statement": "We help Local restaurant owners aged 30-50 who are tech-savvy but lack marketing expertise Boost Results so they can generate more leads.",
+        "key_benefit": "Boost Results",
+        "target_outcome": "generate more leads",
+        "differentiator": "with proven, reliable service",
+        "emotional_hook": "committed to making a difference"
+      },
+      "customer_language": {
+        "key_phrases": [
+          "savvy",
+          "expertise",
+          "owners",
+          "lack",
+          "marketing",
+          "restaurant",
+          "local",
+          "tech",
+          "aged"
+        ],
+        "tone": "friendly",
+        "pain_language": [],
+        "outcome_language": []
+      },
+      "audience_insights": [
+        "Consider mobile-first content approach",
+        "WhatsApp Business could be effective channel",
+        "Regional language content may improve engagement"
+      ],
+      "stage_strength": 1.0
+    },
+    "design": {
+      "stage": "Design & Differentiate",
+      "brand_voice": {
+        "tone": "trustworthy",
+        "personality": "professional",
+        "style": "clear"
+      },
+      "core_message": "We help Local restaurant owners aged 30-50 who are tech-savvy but lack marketing expertise Boost Results so they can generate more leads. with proven, reliable service",
+      "big_idea": {
+        "concept": "Finally, We help small restaurants increase customer footfall through social media marketing That Actually Works",
+        "tagline": "Boost Results Made Simple",
+        "campaign_theme": "Built for Business Betty"
+      },
+      "unique_differentiators": [
+        "Local market expertise",
+        "High-touch customer service"
+      ],
+      "positioning_statement": "For Business Betty, we are the Digital Marketing for Restaurants partner that delivers generate more leads with proven, reliable service.",
+      "brand_story": "Origin: Started this after seeing too many great local restaurants struggle with empty tables. Mission: Our mission is to help customers win. Impact: The result is a community that grows together.",
+      "competitive_angle": {
+        "key_competitors": [
+          "Local competitors",
+          "Digital-first challengers"
+        ],
+        "strengths": [
+          "Clear audience focus",
+          "Modular marketing execution",
+          "Iterative optimization mindset"
+        ],
+        "watchouts": [
+          "Rising ad costs",
+          "Copycat offers"
+        ]
+      },
+      "stage_strength": 0.8
+    },
+    "assemble": {
+      "stage": "Assemble & Automate",
+      "content_calendar": {
+        "weekly_posts": 3,
+        "monthly_campaigns": 1
+      },
+      "marketing_assets": [
+        "Social media posts",
+        "Email templates",
+        "Landing page"
+      ],
+      "automation_setup": [
+        "Email sequences",
+        "Social media scheduling",
+        "Lead nurturing"
+      ],
+      "channel_setup": {
+        "primary_channels": [
+          "Social media posts",
+          "Word of mouth"
+        ]
+      },
+      "content_templates": [
+        "Blog post outline",
+        "Social media captions",
+        "Email newsletter"
+      ],
+      "tool_recommendations": [
+        "Adobe Creative Suite",
+        "HubSpot",
+        "Hootsuite Pro"
+      ],
+      "assembly_checklist": [
+        "Create brand style guide",
+        "Set up content templates",
+        "Configure automation tools",
+        "Prepare first month of content"
+      ],
+      "stage_strength": 0.75
+    },
+    "promote": {
+      "stage": "Promote & Participate",
+      "launch_plan": {
+        "soft_launch": "Week 1: Close network and early adopters",
+        "public_launch": "Week 2: Full marketing campaign",
+        "amplification": "Week 3-4: Partnership and PR outreach"
+      },
+      "campaign_timeline": {
+        "month_1": "Brand awareness campaign",
+        "month_2": "Lead generation focus",
+        "month_3": "Customer success stories"
+      },
+      "engagement_strategy": {
+        "response_time": "Within 2 hours during business hours",
+        "content_mix": "80% value, 20% promotional",
+        "community_guidelines": "Be authentic, helpful, and consistent"
+      },
+      "community_building": [
+        "Customer testimonials",
+        "Behind-the-scenes content",
+        "Local partnerships"
+      ],
+      "partnership_opportunities": [
+        "Complementary businesses",
+        "Industry influencers",
+        "Local organizations"
+      ],
+      "aisas_integration": {
+        "attention": "Eye-catching visuals and headlines",
+        "interest": "Valuable content that solves problems",
+        "search": "SEO-optimized content and local listings",
+        "action": "Clear calls-to-action and simple conversion process",
+        "share": "Encourage testimonials and referrals"
+      },
+      "participation_guidelines": [
+        "Respond to all comments within 24 hours",
+        "Share behind-the-scenes content weekly",
+        "Ask questions to encourage engagement",
+        "Acknowledge and thank community members"
+      ],
+      "stage_strength": 0.85
+    },
+    "track": {
+      "stage": "Track & Tweak",
+      "key_metrics": {
+        "primary": [
+          "Lead generation",
+          "Conversion rate",
+          "Cost per lead"
+        ],
+        "secondary": [
+          "Email open rates",
+          "Content engagement"
+        ]
+      },
+      "measurement_plan": {
+        "frequency": "Weekly reviews, monthly deep dives",
+        "tools": [
+          "Google Analytics",
+          "Social media insights",
+          "Email platform analytics"
+        ],
+        "reporting": "Monthly dashboard with key insights and recommendations"
+      },
+      "feedback_collection": {
+        "methods": [
+          "Customer surveys",
+          "Social media polls",
+          "Direct outreach"
+        ],
+        "frequency": "Quarterly comprehensive, ongoing informal",
+        "focus_areas": [
+          "Product feedback",
+          "Content preferences",
+          "Channel effectiveness"
+        ]
+      },
+      "analytics_setup": [
+        "Google Analytics Pro",
+        "Hootsuite Analytics",
+        "HubSpot Analytics"
+      ],
+      "optimization_areas": [
+        "A/B test email subject lines",
+        "Optimize social media posting times",
+        "Improve website conversion funnel",
+        "Refine target audience segments"
+      ],
+      "iteration_schedule": {
+        "weekly": "Performance review and minor tweaks",
+        "monthly": "Content strategy adjustments",
+        "quarterly": "Full ADAPT cycle review and strategic pivots"
+      },
+      "loop_back_insights": [
+        "Update audience personas based on actual customer data",
+        "Refine messaging based on high-performing content",
+        "Adjust channel mix based on engagement metrics",
+        "Evolve value proposition based on customer feedback"
+      ],
+      "stage_strength": 0.7
+    }
+  },
+  "framework_strength": 0.82,
+  "recommendations": []
+}

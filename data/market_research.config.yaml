@@ -1,0 +1,12 @@
+sites:
+  default:
+    seed_urls:
+      - https://example.com
+    rate_limit: 5
+    cache_ttl: 3600
+  saas:
+    seed_urls:
+      - https://www.g2.com/categories/crm
+      - https://www.getapp.com/customer-management-software/crm/
+    rate_limit: 3
+    cache_ttl: 7200

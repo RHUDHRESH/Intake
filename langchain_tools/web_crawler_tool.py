@@ -1,59 +1,67 @@
-"""LangChain tool for crawling web pages via Playwright."""
+"""LangChain tool for crawling web pages via modular fetchers."""
+from __future__ import annotations
+
 import asyncio
+from pathlib import Path
 from typing import Any, Dict, Optional
 
-from bs4 import BeautifulSoup
 from langchain.tools import BaseTool
-from pydantic import BaseModel, Field, HttpUrl, validator
-from playwright.async_api import async_playwright
+from pydantic import BaseModel, Field, HttpUrl
+
+from market_research import ConfigManager
+from market_research.fetchers import FallbackPageFetcher, PlaywrightFetcher, RequestsFetcher
+from market_research.parsers import SoupHTMLParser
+from market_research.storage import InMemoryStorageAdapter, JSONFileStorageAdapter
+from market_research.telemetry import emit_log
 
 
 class WebCrawlerInput(BaseModel):
     url: HttpUrl = Field(..., description="Fully qualified URL to crawl")
+    site_key: str = Field("default", description="Site config to apply from config file")
+    timeout_ms: int = Field(30000, ge=1000, le=120000)
     wait_for_selector: Optional[str] = Field(
         None,
-        description="Optional CSS selector to await before extracting page contents",
+        description="Optional CSS selector to await before extracting content",
     )
-    timeout_ms: int = Field(
-        30000,
-        description="Navigation timeout (milliseconds) when loading the page",
-        ge=1000,
-        le=120000,
-    )
-    text_limit: int = Field(
-        5000,
-        description="Maximum number of text characters to return from the page body",
-        ge=500,
-        le=50000,
-    )
-
-    @validator("url", pre=True)
-    def strip_url(cls, value: Any) -> Any:
-        if isinstance(value, str):
-            return value.strip()
-        return value
+    text_limit: int = Field(5000, ge=500, le=50000)
 
 
 class WebCrawlerTool(BaseTool):
-    name = "web_crawler_tool"
-    description = (
-        "Fetches a web page using Playwright, returning the title, raw HTML, and "
-        "a text extract suitable for downstream summarisation or embedding."
+    name: str = "web_crawler_tool"
+    description: str = (
+        "Fetches a web page using resilient fetchers, returning title, html, "
+        "and extracted text."
     )
     args_schema: type = WebCrawlerInput
+
+    def __init__(
+        self,
+        *,
+        config_path: Optional[Path] = None,
+        cache_dir: Optional[Path] = None,
+    ) -> None:
+        super().__init__()
+        self._config_manager = ConfigManager(config_path) if config_path else None
+        cache_dir = cache_dir or Path("data/cache")
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        self._cache = JSONFileStorageAdapter(cache_dir)
+        self._memory_cache = InMemoryStorageAdapter()
+        self._parser = SoupHTMLParser()
 
     def _run(
         self,
         url: str,
-        wait_for_selector: Optional[str] = None,
+        site_key: str = "default",
         timeout_ms: int = 30000,
+        wait_for_selector: Optional[str] = None,
         text_limit: int = 5000,
     ) -> Dict[str, Any]:
         return asyncio.run(
             self._arun(
                 url=url,
-                wait_for_selector=wait_for_selector,
+                site_key=site_key,
                 timeout_ms=timeout_ms,
+                wait_for_selector=wait_for_selector,
                 text_limit=text_limit,
             )
         )
@@ -61,30 +69,56 @@ class WebCrawlerTool(BaseTool):
     async def _arun(
         self,
         url: str,
-        wait_for_selector: Optional[str] = None,
+        site_key: str = "default",
         timeout_ms: int = 30000,
+        wait_for_selector: Optional[str] = None,
         text_limit: int = 5000,
     ) -> Dict[str, Any]:
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            response = await page.goto(url, wait_until="networkidle", timeout=timeout_ms)
-            if wait_for_selector:
-                await page.wait_for_selector(wait_for_selector, timeout=timeout_ms)
-            html = await page.content()
-            status = response.status if response else None
-            await browser.close()
-
-        soup = BeautifulSoup(html, "html.parser")
-        title = soup.title.string.strip() if soup.title and soup.title.string else ""
-        text = soup.get_text(separator="\n", strip=True)
+        site_config = self._load_site_config(site_key)
+        cache_key = f"tool:{url}"
+        cached = self._cache.get(cache_key)
+        if cached:
+            cached["source"] = "file-cache"
+            emit_log("web_crawler.cache.hit", extra={"url": url, "site_key": site_key})
+            return cached
+        fetcher = self._build_fetcher(site_config, wait_for_selector=wait_for_selector)
+        result = await fetcher.fetch(url, context={"site": site_key, "timeout": timeout_ms / 1000})
+        parsed = self._parser.parse(result.get("html", ""), url=url)
+        text = parsed.get("text", "")
         if len(text) > text_limit:
             text = text[:text_limit]
-
-        return {
+        payload = {
             "url": url,
-            "status": status,
-            "title": title,
+            "site_key": site_key,
+            "status": result.get("status"),
+            "source": result.get("source"),
+            "title": parsed.get("title"),
+            "html": result.get("html"),
             "text": text,
-            "html": html,
+            "metadata": {"wait_for_selector": wait_for_selector, **site_config},
         }
+        self._cache.put(cache_key, payload, ttl=site_config.get("cache_ttl", 3600))
+        emit_log("web_crawler.fetch.success", extra={"url": url, "site_key": site_key})
+        return payload
+
+    def _load_site_config(self, site_key: str) -> Dict[str, Any]:
+        if not self._config_manager:
+            return {}
+        return self._config_manager.get_site(site_key)
+
+    def _build_fetcher(
+        self,
+        site_config: Dict[str, Any],
+        *,
+        wait_for_selector: Optional[str],
+    ) -> FallbackPageFetcher:
+        rate_limit = site_config.get("rate_limit") or 5
+        return FallbackPageFetcher(
+            [
+                PlaywrightFetcher(wait_for_selector=wait_for_selector),
+                RequestsFetcher(cache=self._memory_cache, rate_limit_per_sec=rate_limit),
+            ]
+        )
+
+
+__all__ = ["WebCrawlerTool"]
