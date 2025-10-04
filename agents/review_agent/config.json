@@ -1,0 +1,4 @@
+{
+  "review_method": "telegram",
+  "retry_limit": 3
+}

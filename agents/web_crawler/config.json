@@ -1,0 +1,5 @@
+{
+  "max_depth": 1,
+  "timeout": 30,
+  "user_agent": "Mozilla/5.0 (intake system web crawler)"
+}

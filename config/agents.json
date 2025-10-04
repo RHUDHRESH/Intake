@@ -1,0 +1,101 @@
+{
+  "orchestrator": {
+    "max_parallel_agents": 5,
+    "agent_timeout": 300,
+    "max_retries": 3,
+    "retry_delay": 5,
+    "enable_hitl": true,
+    "notification_webhooks": [
+      "${TELEGRAM_BOT_TOKEN}",
+      "${DISCORD_WEBHOOK_URL}"
+    ]
+  },
+  "web_crawler": {
+    "headless": true,
+    "timeout": 30000,
+    "max_pages": 10,
+    "max_depth": 2,
+    "user_agent": "MarketingIntakeBot/1.0",
+    "respect_robots_txt": true,
+    "delay_between_requests": 1,
+    "requires_llm": false,
+    "requires_web_scraping": true,
+    "requires_external_apis": false
+  },
+  "nlp_agent": {
+    "model_name": "text-davinci-003",
+    "temperature": 0.7,
+    "max_tokens": 4000,
+    "enable_sentiment_analysis": true,
+    "enable_keyword_extraction": true,
+    "enable_entity_recognition": true,
+    "requires_llm": true,
+    "requires_web_scraping": false,
+    "requires_external_apis": false
+  },
+  "social_agent": {
+    "platforms": ["twitter", "facebook", "instagram", "linkedin"],
+    "max_posts_per_platform": 50,
+    "include_comments": true,
+    "include_hashtags": true,
+    "requires_llm": true,
+    "requires_web_scraping": false,
+    "requires_external_apis": true
+  },
+  "map_agent": {
+    "default_radius_km": 50,
+    "max_locations": 100,
+    "include_nearby_places": true,
+    "place_types": ["establishment", "point_of_interest"],
+    "requires_llm": false,
+    "requires_web_scraping": false,
+    "requires_external_apis": true
+  },
+  "review_agent": {
+    "platforms": ["google", "yelp", "facebook", "trustpilot"],
+    "max_reviews_per_platform": 100,
+    "include_ratings": true,
+    "include_sentiment": true,
+    "min_rating": 1,
+    "max_rating": 5,
+    "requires_llm": true,
+    "requires_web_scraping": false,
+    "requires_external_apis": true
+  },
+  "document_agent": {
+    "supported_formats": [".pdf", ".docx", ".txt", ".md"],
+    "max_file_size_mb": 50,
+    "enable_ocr": true,
+    "extract_tables": true,
+    "extract_images": false,
+    "requires_llm": true,
+    "requires_web_scraping": false,
+    "requires_external_apis": false
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "enable_cloud_logging": true,
+    "enable_file_logging": true,
+    "log_directory": "logs",
+    "max_file_size_mb": 100,
+    "backup_count": 5
+  },
+  "database": {
+    "firestore_collection_prefix": "marketing_intake",
+    "enable_backups": true,
+    "backup_schedule": "daily",
+    "retention_days": 90
+  },
+  "monitoring": {
+    "enable_health_checks": true,
+    "health_check_interval": 30,
+    "enable_metrics": true,
+    "metrics_retention_days": 30,
+    "alert_thresholds": {
+      "error_rate_percent": 5,
+      "response_time_ms": 5000,
+      "memory_usage_percent": 80
+    }
+  }
+}
