@@ -79,7 +79,7 @@ def main() -> None:
         "--refresh-every",
         type=int,
         default=0,
-        help="Minutes between automatic refresh runs. 0 runs once and exits.",
+        help="Minutes between automatic refresh runs (e.g., 60 = refresh every hour). 0 runs once and exits.",
     )
     args = parser.parse_args()
 

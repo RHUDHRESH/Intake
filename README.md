@@ -61,7 +61,7 @@ python scripts/switch6_refresh.py --config my_switch6_profiles.json --output-dir
 python scripts/switch6_review_dashboard.py --segment-csv data/switch6_segment.csv --open
 ```
 
-- `scripts/switch6_refresh.py` accepts `--refresh-every <minutes>` to loop continuously—ideal for cron/Task Scheduler.
+- `scripts/switch6_refresh.py` accepts `--refresh-every <minutes>` (minutes between refreshes) to loop continuouslyâ€”ideal for cron/Task Scheduler.
 - `scripts/generate_switch6_sample.py` produces a sample JSON artifact under `data/examples/` (requires pandas/numpy wheel support).
 
 ## Testing
