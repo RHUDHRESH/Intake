@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledGraph
 
-from classifiers import (
+from Intake.classifiers import (
     AdaptiveQuestionnaire,
     BusinessTypeClassifier,
     FrameworkSelector,

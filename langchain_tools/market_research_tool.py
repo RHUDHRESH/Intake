@@ -8,12 +8,12 @@ from typing import Any, Dict, List, Optional
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 
-from market_research import ConfigManager
-from market_research.fetchers import FallbackPageFetcher, PlaywrightFetcher, RequestsFetcher
-from market_research.nlp import EmbeddingNLPAnalyzer
-from market_research.parsers import SoupHTMLParser
-from market_research.storage import ChromaVectorIndexAdapter, InMemoryStorageAdapter
-from market_research.workflows.orchestrator import build_market_research_orchestrator
+from Intake.market_research import ConfigManager
+from Intake.market_research.fetchers import FallbackPageFetcher, PlaywrightFetcher, RequestsFetcher
+from Intake.market_research.nlp import EmbeddingNLPAnalyzer
+from Intake.market_research.parsers import SoupHTMLParser
+from Intake.market_research.storage import ChromaVectorIndexAdapter, InMemoryStorageAdapter
+from Intake.market_research.workflows.orchestrator import build_market_research_orchestrator
 
 
 class MarketResearchInput(BaseModel):

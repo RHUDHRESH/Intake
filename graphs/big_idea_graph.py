@@ -8,7 +8,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledGraph
 from langgraph.pregel.retry import RetryPolicy
 
-from frameworks.big_idea_pipeline import (
+from Intake.frameworks.big_idea_pipeline import (
     BigIdeaPipeline,
     BigIdeaRequest,
 )

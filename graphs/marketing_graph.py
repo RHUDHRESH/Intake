@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.state import CompiledGraph
 
-from langchain_tools.web_crawler_tool import WebCrawlerTool
+from Intake.langchain_tools.web_crawler_tool import WebCrawlerTool
 
 
 class MarketingState(TypedDict, total=False):
@@ -45,4 +45,3 @@ def compile_marketing_graph(**kwargs) -> CompiledGraph:
     """Convenience helper returning the compiled LangGraph workflow."""
     graph = build_marketing_graph(**kwargs)
     return graph.compile()
-

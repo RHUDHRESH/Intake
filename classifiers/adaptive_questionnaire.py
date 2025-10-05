@@ -1,6 +1,10 @@
 """Adaptive questionnaire flow that tailors follow-up questions by user type."""
 
 from typing import Any, Dict, Iterable, List, Optional, Sequence
+import json
+import os
+from dataclasses import dataclass
+from datetime import datetime
 
 
 def _is_answer_provided(value: Any) -> bool:
@@ -13,6 +17,198 @@ def _is_answer_provided(value: Any) -> bool:
     if isinstance(value, dict):
         return len(value) > 0
     return True
+
+
+@dataclass
+class BusinessContext:
+    """Business context information for intelligent question adaptation."""
+    industry: str
+    business_size: str
+    growth_stage: str
+    target_market: str
+    competitive_landscape: str
+    technical_complexity: str
+
+    def get_complexity_score(self) -> float:
+        """Calculate business complexity for question adaptation."""
+        complexity_factors = {
+            "industry": {"tech_saas": 0.9, "ecommerce": 0.7, "local_business": 0.3, "personal_brand": 0.2},
+            "business_size": {"startup": 0.8, "small": 0.5, "medium": 0.7, "enterprise": 0.9},
+            "growth_stage": {"idea": 0.2, "mvp": 0.5, "growth": 0.8, "mature": 0.9},
+            "competitive_landscape": {"low": 0.3, "medium": 0.6, "high": 0.9},
+            "technical_complexity": {"low": 0.2, "medium": 0.5, "high": 0.8}
+        }
+
+        return sum([
+            complexity_factors["industry"].get(self.industry, 0.5),
+            complexity_factors["business_size"].get(self.business_size, 0.5),
+            complexity_factors["growth_stage"].get(self.growth_stage, 0.5),
+            complexity_factors["competitive_landscape"].get(self.competitive_landscape, 0.5),
+            complexity_factors["technical_complexity"].get(self.technical_complexity, 0.5)
+        ]) / 5.0
+
+
+class EnhancedAdaptiveQuestionnaire:
+    """Enhanced adaptive questionnaire with business intelligence and context awareness."""
+
+    def __init__(self):
+        self.business_contexts = self._load_business_contexts()
+        self.question_weights = self._load_question_weights()
+
+    def _load_business_contexts(self) -> Dict[str, BusinessContext]:
+        """Load business context mappings for intelligent adaptation."""
+        return {
+            "tech_saas": BusinessContext(
+                industry="tech_saas",
+                business_size="startup",
+                growth_stage="mvp",
+                target_market="b2b",
+                competitive_landscape="high",
+                technical_complexity="high"
+            ),
+            "ecommerce": BusinessContext(
+                industry="ecommerce",
+                business_size="small",
+                growth_stage="growth",
+                target_market="b2c",
+                competitive_landscape="medium",
+                technical_complexity="medium"
+            ),
+            "local_business": BusinessContext(
+                industry="local_business",
+                business_size="small",
+                growth_stage="mature",
+                target_market="b2c",
+                competitive_landscape="low",
+                technical_complexity="low"
+            ),
+            "personal_brand": BusinessContext(
+                industry="personal_brand",
+                business_size="startup",
+                growth_stage="idea",
+                target_market="b2c",
+                competitive_landscape="medium",
+                technical_complexity="low"
+            ),
+            "agency": BusinessContext(
+                industry="agency",
+                business_size="small",
+                growth_stage="growth",
+                target_market="b2b",
+                competitive_landscape="high",
+                technical_complexity="medium"
+            )
+        }
+
+    def _load_question_weights(self) -> Dict[str, Dict[str, float]]:
+        """Load question importance weights by business type."""
+        return {
+            "business_owner": {
+                "target_customer": 0.9,
+                "main_challenge": 0.8,
+                "annual_revenue": 0.7,
+                "team_size": 0.6,
+                "marketing_budget": 0.8
+            },
+            "startup_founder": {
+                "growth_ambition": 0.9,
+                "unique_value": 0.9,
+                "biggest_obstacle": 0.8,
+                "funding_status": 0.7,
+                "target_market": 0.8
+            },
+            "personal_brand": {
+                "brand_niche": 0.9,
+                "personal_story": 0.8,
+                "dream_outcome": 0.7,
+                "content_platforms": 0.6,
+                "monetization": 0.8
+            }
+        }
+
+    def detect_business_type_from_answers(self, answers: Dict[str, Any]) -> str:
+        """Intelligently detect business type from partial answers."""
+        # Simple keyword-based detection
+        text_answers = " ".join(str(v) for v in answers.values() if isinstance(v, str)).lower()
+
+        if any(word in text_answers for word in ["saas", "software", "tech", "platform", "api"]):
+            return "b2b_saas"
+        elif any(word in text_answers for word in ["ecommerce", "shop", "store", "product", "inventory"]):
+            return "ecommerce_owner"
+        elif any(word in text_answers for word in ["agency", "client", "retainer", "service"]):
+            return "agency_owner"
+        elif any(word in text_answers for word in ["content", "social media", "influencer", "brand"]):
+            return "personal_brand"
+        elif any(word in text_answers for word in ["local", "restaurant", "retail", "service area"]):
+            return "local_business"
+        else:
+            return "business_owner"  # Default fallback
+
+    def get_contextual_questions(
+        self,
+        user_type: str,
+        answers: Dict[str, Any],
+        context: Optional[BusinessContext] = None
+    ) -> List[Dict[str, Any]]:
+        """Generate contextually relevant questions based on business intelligence."""
+        # For now, return basic questions - enhanced logic would go here
+        base_questions = [
+            {
+                "id": "location",
+                "text": "Where are you located? (City, Country)",
+                "type": "location",
+                "required": True,
+            },
+            {
+                "id": "primary_goal",
+                "text": "What's your primary marketing goal right now?",
+                "type": "single_choice",
+                "options": [
+                    "Increase brand awareness",
+                    "Generate more leads",
+                    "Boost sales/revenue",
+                    "Build community/audience",
+                ],
+                "required": True,
+            }
+        ]
+
+        if not context:
+            context = self.business_contexts.get(user_type, BusinessContext(
+                industry=user_type, business_size="small", growth_stage="growth",
+                target_market="b2b", competitive_landscape="medium", technical_complexity="medium"
+            ))
+
+        # Adapt questions based on complexity and business context
+        adapted_questions = []
+        for question in base_questions:
+            adapted_question = question.copy()
+
+            # Add contextual hints for certain question types
+            if question["id"] == "primary_goal" and context.industry == "b2b_saas":
+                adapted_question["helper_text"] = "For SaaS businesses, consider goals like reducing churn or expanding to enterprise customers"
+
+            adapted_questions.append(adapted_question)
+
+        return adapted_questions
+
+    def generate_business_specific_insights(self, answers: Dict[str, Any], user_type: str) -> Dict[str, Any]:
+        """Generate business-specific insights from answers for better question adaptation."""
+        insights = {
+            "complexity_level": "medium",
+            "urgency_signals": [],
+            "opportunity_areas": [],
+            "risk_factors": []
+        }
+
+        # Analyze based on user type and answers
+        if user_type == "startup_founder":
+            if answers.get("startup_stage") == "Idea stage":
+                insights["complexity_level"] = "low"
+                insights["urgency_signals"].append("early_stage_ideation")
+                insights["opportunity_areas"].append("product_market_fit")
+
+        return insights
 
 
 class AdaptiveQuestionnaire:
@@ -947,4 +1143,3 @@ class AdaptiveQuestionnaire:
         if isinstance(answer, Iterable) and not isinstance(answer, (str, bytes)):
             return option in answer
         return False
-

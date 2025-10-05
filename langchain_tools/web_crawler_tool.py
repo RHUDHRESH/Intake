@@ -8,11 +8,11 @@ from typing import Any, Dict, Optional
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field, HttpUrl
 
-from market_research import ConfigManager
-from market_research.fetchers import FallbackPageFetcher, PlaywrightFetcher, RequestsFetcher
-from market_research.parsers import SoupHTMLParser
-from market_research.storage import InMemoryStorageAdapter, JSONFileStorageAdapter
-from market_research.telemetry import emit_log
+from Intake.market_research import ConfigManager
+from Intake.market_research.fetchers import FallbackPageFetcher, PlaywrightFetcher, RequestsFetcher
+from Intake.market_research.parsers import SoupHTMLParser
+from Intake.market_research.storage import InMemoryStorageAdapter, JSONFileStorageAdapter
+from Intake.market_research.telemetry import emit_log
 
 
 class WebCrawlerInput(BaseModel):
