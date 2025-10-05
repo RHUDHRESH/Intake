@@ -329,7 +329,10 @@ class LLMReframer:
                     completion = model.predict(f"Create a compelling market reframing: {brief}")
                     responses.append(completion.text.strip())
                 return responses
-            except Exception:
+            except Exception as exc:
+                # Log the error but fall back to synthetic generation
+                import logging
+                logging.warning(f"Vertex AI reframing failed: {exc}")
                 pass
         seed = random.Random(hash(brief) % (2**32))
         templates = [
@@ -955,23 +958,44 @@ class Switch6FrameworkEngine:
         if isinstance(value, (int, float)):
             return float(value)
         if isinstance(value, str):
-            cleaned = value.replace("$", "").replace(",", "").strip().lower()
-            if "-" in cleaned:
-                parts = cleaned.split("-")
-                numeric_parts = [Switch6FrameworkEngine._parse_currency(part) for part in parts]
-                numeric_parts = [part for part in numeric_parts if part]
+            cleaned = value.replace("$", "").replace(",", "").strip()
+            if not cleaned or len(cleaned) > 20:  # Reasonable max length to prevent abuse
+                return None
+            cleaned_lower = cleaned.lower()
+
+            # Handle ranges (e.g., "5-10k")
+            if "-" in cleaned_lower:
+                parts = cleaned_lower.split("-")
+                if len(parts) != 2:
+                    return None
+                numeric_parts = [Switch6FrameworkEngine._parse_currency(part.strip()) for part in parts]
+                numeric_parts = [part for part in numeric_parts if part is not None]
                 if numeric_parts:
                     return float(sum(numeric_parts) / len(numeric_parts))
-            multipliers = {"k": 1_000, "m": 1_000_000}
-            suffix = cleaned[-1]
-            if suffix in multipliers and cleaned[:-1]:
+                return None
+
+            multipliers = {"k": 1_000, "m": 1_000_000, "b": 1_000_000_000}
+            suffix = cleaned_lower[-1]
+            if suffix in multipliers and len(cleaned_lower) > 1:
                 try:
-                    return float(cleaned[:-1]) * multipliers[suffix]
-                except ValueError:
+                    base_value = float(cleaned_lower[:-1])
+                    # Prevent extremely large values that could cause overflow
+                    if base_value > 1_000_000:
+                        return None
+                    return base_value * multipliers[suffix]
+                except (ValueError, OverflowError):
                     return None
+
             try:
-                return float(cleaned)
-            except ValueError:
+                result = float(cleaned_lower)
+                # Prevent infinity or NaN values
+                if not (result == result) or abs(result) == float('inf'):  # NaN check and infinity check
+                    return None
+                # Reasonable bounds for currency values
+                if abs(result) > 1_000_000_000_000:  # $1 trillion should be enough
+                    return None
+                return result
+            except (ValueError, OverflowError):
                 return None
         return None
 
@@ -1005,26 +1029,3 @@ class Switch6FrameworkEngine:
         if data.get("annual_revenue"):
             baseline += 0.05
         return round(min(baseline, 1.0), 3)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

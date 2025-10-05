@@ -28,7 +28,19 @@ class MarketResearchAgentTool(BaseTool):
     args_schema: type = MarketResearchInput
 
     def _run(self, config_path: Path, site_key: str = "default", seed_urls: Optional[List[str]] = None) -> Dict[str, Any]:
-        return asyncio.run(self._arun(config_path=config_path, site_key=site_key, seed_urls=seed_urls))
+        try:
+            loop = asyncio.get_running_loop()
+            # We're in an async context, create a task instead
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    asyncio.run,
+                    self._arun(config_path=config_path, site_key=site_key, seed_urls=seed_urls)
+                )
+                return future.result()
+        except RuntimeError:
+            # No running loop, safe to call asyncio.run
+            return asyncio.run(self._arun(config_path=config_path, site_key=site_key, seed_urls=seed_urls))
 
     async def _arun(
         self,

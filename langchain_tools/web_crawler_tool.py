@@ -56,15 +56,33 @@ class WebCrawlerTool(BaseTool):
         wait_for_selector: Optional[str] = None,
         text_limit: int = 5000,
     ) -> Dict[str, Any]:
-        return asyncio.run(
-            self._arun(
-                url=url,
-                site_key=site_key,
-                timeout_ms=timeout_ms,
-                wait_for_selector=wait_for_selector,
-                text_limit=text_limit,
+        try:
+            loop = asyncio.get_running_loop()
+            # We're in an async context, create a task instead
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                future = executor.submit(
+                    asyncio.run,
+                    self._arun(
+                        url=url,
+                        site_key=site_key,
+                        timeout_ms=timeout_ms,
+                        wait_for_selector=wait_for_selector,
+                        text_limit=text_limit,
+                    )
+                )
+                return future.result()
+        except RuntimeError:
+            # No running loop, safe to call asyncio.run
+            return asyncio.run(
+                self._arun(
+                    url=url,
+                    site_key=site_key,
+                    timeout_ms=timeout_ms,
+                    wait_for_selector=wait_for_selector,
+                    text_limit=text_limit,
+                )
             )
-        )
 
     async def _arun(
         self,

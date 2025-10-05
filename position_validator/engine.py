@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from market_research.interfaces import PositionScoringModule
 
@@ -25,10 +25,10 @@ class PositionValidatorEngine:
         *,
         context: Optional[Dict[str, str]] = None,
         module_overrides: Optional[Dict[str, ModuleConfig]] = None,
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         context = context or {}
         overrides = module_overrides or {}
-        results: List[Dict[str, any]] = []
+        results: List[Dict[str, Any]] = []
         total_weight = 0.0
         weighted_score = 0.0
 
@@ -53,8 +53,8 @@ class PositionValidatorEngine:
         }
 
 
-def _flatten_feedback(results: List[Dict[str, any]]) -> List[Dict[str, any]]:
-    flattened: List[Dict[str, any]] = []
+def _flatten_feedback(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    flattened: List[Dict[str, Any]] = []
     for result in results:
         module = result.get("module")
         for entry in result.get("feedback", []) or []:
