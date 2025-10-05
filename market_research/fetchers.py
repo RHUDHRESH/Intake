@@ -55,7 +55,7 @@ class RequestsFetcher(PageFetcher):
             for attempt in range(self._retries + 1):
                 headers = {"User-Agent": random.choice(USER_AGENT_POOL)}
                 try:
-                    async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
+                    async with httpx.AsyncClient(timeout=self._timeout, follow_redirects=True) as client:
                         response = await client.get(url, headers=headers)
                     payload = {
                         "url": url,
@@ -153,4 +153,3 @@ class FallbackPageFetcher(PageFetcher):
 
 
 __all__ = ["FallbackPageFetcher", "PlaywrightFetcher", "RequestsFetcher"]
-
